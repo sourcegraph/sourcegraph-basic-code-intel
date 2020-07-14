@@ -73,19 +73,20 @@ export async function makeRangeWindowFactory(
     >()
 
     const getPromise = async (
-        doc: sourcegraph.TextDocument,
+        textDocument: sourcegraph.TextDocument,
         position: sourcegraph.Position
     ): Promise<CodeIntelligenceRange[] | null> => {
-        let cacheEntry = cache.get(doc.uri)
+        let cacheEntry = cache.get(textDocument.uri)
         if (!cacheEntry) {
             // Add fresh entry
             cacheEntry = { lasthit: new Date(), windows: [] }
-            cache.set(doc.uri, cacheEntry)
-
+            cache.set(textDocument.uri, cacheEntry)
             // Remove oldest entries to keep the cache under capacity
             while (cache.size > WINDOW_CACHE_CAPACITY) {
                 cache.delete(
-                    Array.from(cache.entries()).reduce((e1, e2) => (e1[1].lasthit < e2[1].lasthit ? e1 : e2))[0]
+                    [...cache.entries()].reduce((entry1, entry2) =>
+                        entry1[1].lasthit < entry2[1].lasthit ? entry1 : entry2
+                    )[0]
                 )
             }
         } else {
@@ -93,11 +94,11 @@ export async function makeRangeWindowFactory(
             cacheEntry.lasthit = new Date()
         }
 
-        return findOverlappingWindows(doc, position, cacheEntry?.windows || [], queryGraphQL)
+        return findOverlappingWindows(textDocument, position, cacheEntry?.windows || [], queryGraphQL)
     }
 
-    return async (doc, position) =>
-        findOverlappingCodeIntelligenceRange(position, (await getPromise(doc, position)) || [])
+    return async (textDocument, position) =>
+        findOverlappingCodeIntelligenceRange(position, (await getPromise(textDocument, position)) || [])
 }
 
 /**
@@ -115,7 +116,7 @@ export async function makeRangeWindowFactory(
  * @param queryGraphQL The function used to query the GraphQL API.
  */
 export async function findOverlappingWindows(
-    doc: sourcegraph.TextDocument,
+    textDocument: sourcegraph.TextDocument,
     position: sourcegraph.Position,
     rangeWindows: RangeWindow[],
     queryGraphQL: QueryGraphQLFn<any> = sgQueryGraphQL
@@ -146,7 +147,7 @@ export async function findOverlappingWindows(
 
     // Query this range and insert it into the current index to keep the
     // array of windows sorted.
-    const ranges = rangesInRangeWindow(doc, startLine, endLine, queryGraphQL)
+    const ranges = rangesInRangeWindow(textDocument, startLine, endLine, queryGraphQL)
     rangeWindows.splice(index + 1, 0, { startLine, endLine, ranges })
     return ranges
 }
@@ -180,8 +181,8 @@ export function findOverlappingCodeIntelligenceRange(
     position: sourcegraph.Position,
     ranges: CodeIntelligenceRange[]
 ): CodeIntelligenceRange | null {
-    return (
-        ranges.find(
+    const overlapping =
+        ranges.filter(
             ({
                 range: {
                     start: { line: startLine, character: startCharacter },
@@ -193,7 +194,21 @@ export function findOverlappingCodeIntelligenceRange(
                 // right side check
                 (position.line < endLine || (position.line === endLine && position.character < endCharacter))
         ) || null
-    )
+
+    if (overlapping.length === 0) {
+        return null
+    }
+
+    overlapping.sort((a, b) => {
+        const cmp = b.range.start.line - a.range.start.line
+        if (cmp === 0) {
+            return b.range.start.character - a.range.start.character
+        }
+
+        return cmp
+    })
+
+    return overlapping[0]
 }
 
 const introspectionQuery = gql`
@@ -283,14 +298,14 @@ const rangesQuery = gql`
 
 /** Retrieve local (same-bundle) code intelligence for symbols between the given lines. */
 export async function rangesInRangeWindow(
-    doc: sourcegraph.TextDocument,
+    textDocument: sourcegraph.TextDocument,
     startLine: number,
     endLine: number,
     queryGraphQL: QueryGraphQLFn<GenericLSIFResponse<RangesResponse | null>> = sgQueryGraphQL
 ): Promise<CodeIntelligenceRange[] | null> {
     return rangesResponseToCodeIntelligenceRangeNodes(
-        doc,
-        await queryLSIF({ query: rangesQuery, uri: doc.uri, startLine, endLine }, queryGraphQL)
+        textDocument,
+        await queryLSIF({ query: rangesQuery, uri: textDocument.uri, startLine, endLine }, queryGraphQL)
     )
 }
 
@@ -312,10 +327,10 @@ export interface CodeIntelligenceRangeConnectionNode {
  * @param lsifObj The resolved LSIF object.
  */
 export function rangesResponseToCodeIntelligenceRangeNodes(
-    doc: sourcegraph.TextDocument,
-    lsifObj: RangesResponse | null
+    textDocument: sourcegraph.TextDocument,
+    lsifObject: RangesResponse | null
 ): CodeIntelligenceRange[] | null {
-    return lsifObj?.ranges.nodes.map(node => nodeToCodeIntelligenceRange(doc, node)) || null
+    return lsifObject?.ranges.nodes.map(node => nodeToCodeIntelligenceRange(textDocument, node)) || null
 }
 
 /**
@@ -325,13 +340,13 @@ export function rangesResponseToCodeIntelligenceRangeNodes(
  * @param node A code intelligence range connection node.
  */
 export function nodeToCodeIntelligenceRange(
-    doc: sourcegraph.TextDocument,
+    textDocument: sourcegraph.TextDocument,
     { range, definitions, references, hover }: CodeIntelligenceRangeConnectionNode
 ): CodeIntelligenceRange {
     return {
         range,
-        definitions: (definitions?.nodes || []).map(node => nodeToLocation(doc, node)),
-        references: (references?.nodes || []).map(node => nodeToLocation(doc, node)),
+        definitions: (definitions?.nodes || []).map(node => nodeToLocation(textDocument, node)),
+        references: (references?.nodes || []).map(node => nodeToLocation(textDocument, node)),
         hover,
     }
 }

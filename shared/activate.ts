@@ -17,29 +17,29 @@ const DUMMY_CTX = {
 /**
  * Activate the extension.
  *
- * @param ctx  The extension context.
+ * @param context  The extension context.
  * @param selector The document selector for which this extension is active.
  * @param languageSpec The language spec used to provide search-based code intelligence.
  * @param logger An optional logger instance.
  */
 export function activateCodeIntel(
-    ctx: sourcegraph.ExtensionContext = DUMMY_CTX,
+    context: sourcegraph.ExtensionContext = DUMMY_CTX,
     selector: sourcegraph.DocumentSelector,
     languageSpec: LanguageSpec,
     logger: Logger = new RedactingLogger(console)
 ): void {
     const wrapper = createProviderWrapper(languageSpec, logger)
 
-    ctx.subscriptions.add(sourcegraph.languages.registerDefinitionProvider(selector, wrapper.definition()))
+    context.subscriptions.add(sourcegraph.languages.registerDefinitionProvider(selector, wrapper.definition()))
 
-    ctx.subscriptions.add(sourcegraph.languages.registerReferenceProvider(selector, wrapper.references()))
+    context.subscriptions.add(sourcegraph.languages.registerReferenceProvider(selector, wrapper.references()))
 
-    ctx.subscriptions.add(sourcegraph.languages.registerHoverProvider(selector, wrapper.hover()))
+    context.subscriptions.add(sourcegraph.languages.registerHoverProvider(selector, wrapper.hover()))
 
     // Do not try to register this provider on pre-3.18 instances as it
     // didn't exist.
     if (sourcegraph.languages.registerDocumentHighlightProvider) {
-        ctx.subscriptions.add(
+        context.subscriptions.add(
             sourcegraph.languages.registerDocumentHighlightProvider(selector, wrapper.documentHighlights())
         )
     }

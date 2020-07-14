@@ -7,11 +7,9 @@ import { LSPClient } from '../../../shared/lsp/client'
 import { webSocketTransport } from '../../../shared/lsp/connection'
 import { FeatureOptions, register } from '../../../shared/lsp/registration'
 import { ProviderWrapper } from '../../../shared/providers'
-import { gitToRawApiUri, rawApiToGitUri } from '../../../shared/util/uri'
-import { Settings } from './settings'
 import { createExternalReferencesProvider } from './xrefs'
 
-const documentSelector: sourcegraph.DocumentSelector = [{ language: 'typescript' }, { language: 'javascript' }]
+const documentSelector = [{ language: 'go' }]
 
 /**
  * Register providers on the extension host.
@@ -22,8 +20,8 @@ export function activate(context: sourcegraph.ExtensionContext): Promise<void> {
     return activateCodeIntel(
         context,
         documentSelector,
-        findLanguageSpec('typescript'),
-        initLSP('typescript', registerClient, createExternalReferencesProvider)
+        findLanguageSpec('go'),
+        initLSP('go', registerClient, createExternalReferencesProvider)
     )
 }
 
@@ -39,7 +37,6 @@ async function registerClient({
     sourcegraphURL,
     accessToken,
     providerWrapper,
-    settings,
 }: {
     /** The extension context. */
     ctx: sourcegraph.ExtensionContext
@@ -54,8 +51,6 @@ async function registerClient({
      * with LSIF and basic intelligence.
      */
     providerWrapper: ProviderWrapper
-    /** The current settings. */
-    settings: Settings
 }): Promise<{
     client: LSPClient
     featureOptionsSubject: Subject<FeatureOptions>
@@ -68,9 +63,11 @@ async function registerClient({
         cancellationToken,
     })
 
-    const initializationOptions = { configuration: settings }
-    const clientToServerURI = (uri: URL): URL => gitToRawApiUri(sourcegraphURL, accessToken, uri)
-    const serverToClientURI = rawApiToGitUri
+    // Returns a URL template to the raw API (e.g. 'https://%s@localhost:3080/%s@%s/-/raw')
+    const { protocol, host } = sourcegraphURL
+    const token = accessToken ? accessToken + '@' : ''
+    const zipURLTemplate = `${protocol}//${token}${host}/%s@%s/-/raw`
+    const initializationOptions = { zipURLTemplate }
 
     const featureOptions = new Subject<FeatureOptions>()
 
@@ -78,11 +75,9 @@ async function registerClient({
         sourcegraph,
         transport,
         initializationOptions,
-        clientToServerURI,
-        serverToClientURI,
+        featureOptions,
         documentSelector,
         providerWrapper,
-        featureOptions,
         cancellationToken,
     })
 
