@@ -1,10 +1,5 @@
 import * as assert from 'assert'
-import {
-    asyncGeneratorFromPromise,
-    concat,
-    flatMapConcurrent,
-    observableFromAsyncIterator,
-} from './ix'
+import { asyncGeneratorFromPromise, concat, flatMapConcurrent, observableFromAsyncIterator } from './ix'
 
 describe('observableFromAsyncIterator', () => {
     it('converts iterator into an observable', async () => {
@@ -20,9 +15,7 @@ describe('observableFromAsyncIterator', () => {
         )
 
         const values: number[] = []
-        await new Promise(complete =>
-            o.subscribe({ next: v => values.push(v), complete })
-        )
+        await new Promise(complete => o.subscribe({ next: v => values.push(v), complete }))
         assert.deepStrictEqual(values, [1, 2, 3, 4, 5])
     })
 
@@ -53,11 +46,7 @@ describe('concat', () => {
             })()
         )
 
-        assert.deepStrictEqual(await gatherValues(iterable), [
-            [1],
-            [1, 2, 3],
-            [1, 2, 3, 4, 5],
-        ])
+        assert.deepStrictEqual(await gatherValues(iterable), [[1], [1, 2, 3], [1, 2, 3, 4, 5]])
     })
 
     it('ignores nulls', async () => {
@@ -73,19 +62,13 @@ describe('concat', () => {
             })()
         )
 
-        assert.deepStrictEqual(await gatherValues(iterable), [
-            [1],
-            [1, 2, 3],
-            [1, 2, 3, 4, 5],
-        ])
+        assert.deepStrictEqual(await gatherValues(iterable), [[1], [1, 2, 3], [1, 2, 3, 4, 5]])
     })
 })
 
 describe('flatMapConcurrent', () => {
     it('yields mapped source values', async () => {
-        const iterable = flatMapConcurrent([1, 2, 3, 4, 5], 5, async x =>
-            Promise.resolve(x * 2)
-        )
+        const iterable = flatMapConcurrent([1, 2, 3, 4, 5], 5, async x => Promise.resolve(x * 2))
 
         assert.deepStrictEqual(await gatherValues(iterable), [2, 4, 6, 8, 10])
     })
@@ -93,9 +76,7 @@ describe('flatMapConcurrent', () => {
 
 describe('asyncGeneratorFromPromise', () => {
     it('yields mapped values', async () => {
-        const iterable = asyncGeneratorFromPromise(async (x: number) =>
-            Promise.resolve(x * 2)
-        )
+        const iterable = asyncGeneratorFromPromise(async (x: number) => Promise.resolve(x * 2))
 
         assert.deepStrictEqual(await gatherValues(iterable(24)), [48])
     })

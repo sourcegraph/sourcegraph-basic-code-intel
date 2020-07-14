@@ -48,9 +48,7 @@ describe('createDefinitionProvider', () => {
             () => asyncGeneratorFromValues([loc3])
         ).provideDefinition(doc, pos) as Observable<sourcegraph.Definition>
 
-        assert.deepStrictEqual(await gatherValues(result), [
-            { ...loc3, badge: impreciseBadge },
-        ])
+        assert.deepStrictEqual(await gatherValues(result), [{ ...loc3, badge: impreciseBadge }])
     })
 })
 
@@ -108,13 +106,7 @@ describe('createReferencesProvider', () => {
             [loc1, loc2],
             [loc1, loc2, loc3],
             [loc1, loc2, loc3, { ...loc4, badge: impreciseBadge }],
-            [
-                loc1,
-                loc2,
-                loc3,
-                { ...loc4, badge: impreciseBadge },
-                { ...loc7, badge: impreciseBadge },
-            ],
+            [loc1, loc2, loc3, { ...loc4, badge: impreciseBadge }, { ...loc7, badge: impreciseBadge }],
         ])
     })
 })
@@ -124,9 +116,7 @@ describe('createHoverProvider', () => {
         const result = createHoverProvider(
             () => asyncGeneratorFromValues([hover1, hover2]),
             () => asyncGeneratorFromValues([hover3])
-        ).provideHover(doc, pos) as Observable<
-            sourcegraph.Badged<sourcegraph.Hover>
-        >
+        ).provideHover(doc, pos) as Observable<sourcegraph.Badged<sourcegraph.Hover>>
 
         assert.deepStrictEqual(await gatherValues(result), [hover1, hover2])
     })
@@ -135,13 +125,9 @@ describe('createHoverProvider', () => {
         const result = createHoverProvider(
             () => asyncGeneratorFromValues([]),
             () => asyncGeneratorFromValues([hover3])
-        ).provideHover(doc, pos) as Observable<
-            sourcegraph.Badged<sourcegraph.Hover>
-        >
+        ).provideHover(doc, pos) as Observable<sourcegraph.Badged<sourcegraph.Hover>>
 
-        assert.deepStrictEqual(await gatherValues(result), [
-            { ...hover3, badge: impreciseBadge },
-        ])
+        assert.deepStrictEqual(await gatherValues(result), [{ ...hover3, badge: impreciseBadge }])
     })
 })
 
@@ -149,19 +135,13 @@ describe('createDocumentHighlightProvider', () => {
     it('uses LSIF document highlights', async () => {
         const result = createDocumentHighlightProvider(() =>
             asyncGeneratorFromValues([[{ range: range1 }, { range: range2 }]])
-        ).provideDocumentHighlights(doc, pos) as Observable<
-            sourcegraph.DocumentHighlight[]
-        >
+        ).provideDocumentHighlights(doc, pos) as Observable<sourcegraph.DocumentHighlight[]>
 
-        assert.deepStrictEqual(await gatherValues(result), [
-            [{ range: range1 }, { range: range2 }],
-        ])
+        assert.deepStrictEqual(await gatherValues(result), [[{ range: range1 }, { range: range2 }]])
     })
 })
 
-async function* asyncGeneratorFromValues<P>(
-    source: P[]
-): AsyncGenerator<P, void, undefined> {
+async function* asyncGeneratorFromValues<P>(source: P[]): AsyncGenerator<P, void, undefined> {
     await Promise.resolve()
 
     for (const value of source) {
@@ -171,8 +151,6 @@ async function* asyncGeneratorFromValues<P>(
 
 async function gatherValues<T>(o: Observable<T>): Promise<T[]> {
     const values: T[] = []
-    await new Promise(complete =>
-        o.subscribe({ next: v => values.push(v), complete })
-    )
+    await new Promise(complete => o.subscribe({ next: v => values.push(v), complete }))
     return values
 }

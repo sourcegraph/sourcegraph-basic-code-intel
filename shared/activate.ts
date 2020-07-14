@@ -30,32 +30,17 @@ export function activateCodeIntel(
 ): void {
     const wrapper = createProviderWrapper(languageSpec, logger)
 
-    ctx.subscriptions.add(
-        sourcegraph.languages.registerDefinitionProvider(
-            selector,
-            wrapper.definition()
-        )
-    )
+    ctx.subscriptions.add(sourcegraph.languages.registerDefinitionProvider(selector, wrapper.definition()))
 
-    ctx.subscriptions.add(
-        sourcegraph.languages.registerReferenceProvider(
-            selector,
-            wrapper.references()
-        )
-    )
+    ctx.subscriptions.add(sourcegraph.languages.registerReferenceProvider(selector, wrapper.references()))
 
-    ctx.subscriptions.add(
-        sourcegraph.languages.registerHoverProvider(selector, wrapper.hover())
-    )
+    ctx.subscriptions.add(sourcegraph.languages.registerHoverProvider(selector, wrapper.hover()))
 
     // Do not try to register this provider on pre-3.18 instances as it
     // didn't exist.
     if (sourcegraph.languages.registerDocumentHighlightProvider) {
         ctx.subscriptions.add(
-            sourcegraph.languages.registerDocumentHighlightProvider(
-                selector,
-                wrapper.documentHighlights()
-            )
+            sourcegraph.languages.registerDocumentHighlightProvider(selector, wrapper.documentHighlights())
         )
     }
 }
