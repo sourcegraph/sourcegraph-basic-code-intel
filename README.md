@@ -7,9 +7,7 @@ This repository contains the code for the [Sourcegraph extensions that provide c
 
 ## Repository structure
 
--   [`src/extensions/go`](./src/extensions/go) The Go extension (supports LSP)
--   [`src/extensions/typescript`](./src/extensions/typescript) The TypeScript extension (supports LSP)
--   [`src/extensions/template`](./src/extensions/template) Template for all other languages (**does not** support LSP)
+-   [`src/extensions/template`](./src/extensions/template) Template extension for all languages
 -   [`shared/language-specs`](./shared/language-specs) Language definitions, which are fed into the template to instantiate many language extensions
 
 ## Development

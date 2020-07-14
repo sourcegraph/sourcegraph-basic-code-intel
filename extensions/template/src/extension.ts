@@ -36,8 +36,8 @@ export async function activate(
 function activateSpec(
     spec: LanguageSpec,
     ctx?: sourcegraph.ExtensionContext
-): Promise<void> {
-    return activateCodeIntel(ctx, spec.fileExts.flatMap(createSelector), spec)
+): void {
+    activateCodeIntel(ctx, spec.fileExts.flatMap(createSelector), spec)
 }
 
 function createSelector(ext: string): sourcegraph.DocumentSelector {

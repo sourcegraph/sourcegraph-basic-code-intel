@@ -142,41 +142,36 @@ export function createProviderWrapper(
     const searchProviders = createSearchProviders(languageSpec, wrapped)
 
     return {
-        definition: (lspProvider?: DefinitionProvider) => {
+        definition: () => {
             const provider = createDefinitionProvider(
                 lsifProviders.definition,
-                searchProviders.definition,
-                lspProvider
+                searchProviders.definition
             )
             wrapped.definition = provider
             return provider
         },
 
-        references: (lspProvider?: ReferencesProvider) => {
+        references: () => {
             const provider = createReferencesProvider(
                 lsifProviders.references,
-                searchProviders.references,
-                lspProvider
+                searchProviders.references
             )
             wrapped.references = provider
             return provider
         },
 
-        hover: (lspProvider?: HoverProvider) => {
+        hover: () => {
             const provider = createHoverProvider(
                 lsifProviders.hover,
-                searchProviders.hover,
-                lspProvider
+                searchProviders.hover
             )
             wrapped.hover = provider
             return provider
         },
 
-        documentHighlights: (lspProvider?: DocumentHighlightProvider) => {
+        documentHighlights: () => {
             const provider = createDocumentHighlightProvider(
-                lsifProviders.documentHighlights,
-                searchProviders.documentHighlights,
-                lspProvider
+                lsifProviders.documentHighlights
             )
             wrapped.documentHighlights = provider
             return provider
@@ -189,12 +184,10 @@ export function createProviderWrapper(
  *
  * @param lsifProvider The LSIF-based definition provider.
  * @param searchProvider The search-based definition provider.
- * @param lspProvider An optional LSP-based definition provider.
  */
 export function createDefinitionProvider(
     lsifProvider: DefinitionProvider,
-    searchProvider: DefinitionProvider,
-    lspProvider?: DefinitionProvider
+    searchProvider: DefinitionProvider
 ): sourcegraph.DefinitionProvider {
     return {
         provideDefinition: wrapProvider(async function*(
@@ -216,24 +209,6 @@ export function createDefinitionProvider(
                 return
             }
 
-            if (lspProvider) {
-                for await (const lspResult of lspProvider(doc, pos)) {
-                    if (nonEmpty(lspResult)) {
-                        // Do not emit definition events for empty location arrays
-                        await emitter.emitOnce('lspDefinitions')
-                    }
-
-                    // Always emit the result regardless if it's interesting. If we return
-                    // without emitting anything here we may indefinitely show an empty hover
-                    // on identifiers with no interesting data indefinitely.
-                    yield lspResult
-                }
-
-                // Do not try to supplement with additional search results as we have all the
-                // context we need for complete and precise results here.
-                return
-            }
-
             // No results so far, fall back to search
             for await (const searchResult of searchProvider(doc, pos)) {
                 if (nonEmpty(searchResult)) {
@@ -252,12 +227,10 @@ export function createDefinitionProvider(
  *
  * @param lsifProvider The LSIF-based references provider.
  * @param searchProvider The search-based references provider.
- * @param lspProvider An optional LSP-based references provider.
  */
 export function createReferencesProvider(
     lsifProvider: ReferencesProvider,
-    searchProvider: ReferencesProvider,
-    lspProvider?: ReferencesProvider
+    searchProvider: ReferencesProvider
 ): sourcegraph.ReferenceProvider {
     // Gets an opaque value that is the same for all locations
     // within a file but different from other files.
@@ -279,26 +252,6 @@ export function createReferencesProvider(
                     yield lsifResult
                     lsifResults = lsifResult
                 }
-            }
-
-            if (lspProvider) {
-                for await (const lspResult of lspProvider(doc, pos, ctx)) {
-                    // TODO - reduce duplicates between LSIF and LSP
-                    const filteredResults = asArray(lspResult)
-                    if (filteredResults.length === 0) {
-                        continue
-                    }
-
-                    // Re-emit the last results from the previous provider
-                    // so we do not overwrite what was emitted previously.
-                    await emitter.emitOnce('lspReferences')
-                    yield lsifResults.concat(filteredResults)
-                }
-
-                // Do not try to supplement with additional search results
-                // as we have all the context we need for complete and precise
-                // results here.
-                return
             }
 
             const lsifFiles = new Set(lsifResults.map(file))
@@ -332,12 +285,10 @@ export function createReferencesProvider(
  *
  * @param lsifProvider The LSIF-based hover provider.
  * @param searchProvider The search-based hover provider.
- * @param lspProvider An optional LSP-based hover provider.
  */
 export function createHoverProvider(
     lsifProvider: HoverProvider,
-    searchProvider: HoverProvider,
-    lspProvider?: HoverProvider
+    searchProvider: HoverProvider
 ): sourcegraph.HoverProvider {
     return {
         provideHover: wrapProvider(async function*(
@@ -363,21 +314,6 @@ export function createHoverProvider(
                 return
             }
 
-            if (lspProvider) {
-                // Delegate to LSP if it's available.
-                for await (const lspResult of lspProvider(doc, pos)) {
-                    if (lspResult) {
-                        await emitter.emitOnce('lspHover')
-                        yield lspResult
-                    }
-                }
-
-                // Do not try to supplement with additional search results
-                // as we have all the context we need for complete and precise
-                // results here.
-                return
-            }
-
             for await (const searchResult of searchProvider(doc, pos)) {
                 // No results so far, fall back to search. Mark the result as
                 // imprecise.
@@ -395,12 +331,9 @@ export function createHoverProvider(
  *
  * @param lsifProvider The LSIF-based document highlight provider.
  * @param searchProvider The search-based document highlight provider.
- * @param lspProvider An optional LSP-based document highlight provider.
  */
 export function createDocumentHighlightProvider(
-    lsifProvider: DocumentHighlightProvider,
-    searchProvider: DocumentHighlightProvider,
-    lspProvider?: DocumentHighlightProvider
+    lsifProvider: DocumentHighlightProvider
 ): sourcegraph.DocumentHighlightProvider {
     return {
         provideDocumentHighlights: wrapProvider(async function*(
