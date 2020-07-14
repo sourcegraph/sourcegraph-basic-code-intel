@@ -10,7 +10,7 @@ import {
     createDocumentHighlightProvider,
 } from './providers'
 
-const document = createStubTextDocument({
+const textDocument = createStubTextDocument({
     uri: 'https://sourcegraph.test/repo@rev/-/raw/foo.ts',
     languageId: 'typescript',
     text: undefined,
@@ -24,9 +24,9 @@ const location1 = new sourcegraph.Location(new URL('http://test/1'), range1)
 const location2 = new sourcegraph.Location(new URL('http://test/2'), range1)
 const location3 = new sourcegraph.Location(new URL('http://test/3'), range1)
 const location4 = new sourcegraph.Location(new URL('http://test/4'), range1)
-const location5 = new sourcegraph.Location(new URL('http://test/5'), range1)
-const location6 = new sourcegraph.Location(new URL('http://test/6'), range1)
-const location7 = new sourcegraph.Location(new URL('http://test/2'), range2) // overlapping URI
+const location5 = new sourcegraph.Location(new URL('http://test/2'), range2) // overlapping URI
+const location6 = new sourcegraph.Location(new URL('http://test/3'), range2) // overlapping URI
+const location7 = new sourcegraph.Location(new URL('http://test/4'), range2) // overlapping URI
 
 const hover1: sourcegraph.Hover = { contents: { value: 'test1' } }
 const hover2: sourcegraph.Hover = { contents: { value: 'test2' } }
@@ -37,7 +37,7 @@ describe('createDefinitionProvider', () => {
         const result = createDefinitionProvider(
             () => asyncGeneratorFromValues([location1, location2]),
             () => asyncGeneratorFromValues([location3])
-        ).provideDefinition(document, position) as Observable<sourcegraph.Definition>
+        ).provideDefinition(textDocument, position) as Observable<sourcegraph.Definition>
 
         assert.deepStrictEqual(await gatherValues(result), [location1, location2])
     })
@@ -46,7 +46,7 @@ describe('createDefinitionProvider', () => {
         const result = createDefinitionProvider(
             () => asyncGeneratorFromValues([]),
             () => asyncGeneratorFromValues([location3])
-        ).provideDefinition(document, position) as Observable<sourcegraph.Definition>
+        ).provideDefinition(textDocument, position) as Observable<sourcegraph.Definition>
 
         assert.deepStrictEqual(await gatherValues(result), [{ ...location3, badge: impreciseBadge }])
     })
@@ -61,7 +61,7 @@ describe('createReferencesProvider', () => {
                     [location1, location2, location3],
                 ]),
             () => asyncGeneratorFromValues([])
-        ).provideReferences(document, position, {
+        ).provideReferences(textDocument, position, {
             includeDeclaration: false,
         }) as Observable<sourcegraph.Badged<sourcegraph.Location>[]>
 
@@ -79,7 +79,7 @@ describe('createReferencesProvider', () => {
                     [location1, location2, location3],
                 ]),
             () => asyncGeneratorFromValues([[location4]])
-        ).provideReferences(document, position, {
+        ).provideReferences(textDocument, position, {
             includeDeclaration: false,
         }) as Observable<sourcegraph.Badged<sourcegraph.Location>[]>
 
@@ -98,7 +98,7 @@ describe('createReferencesProvider', () => {
                     [location1, location2, location3],
                 ]),
             () => asyncGeneratorFromValues([[location4], [location4, location5, location6, location7]])
-        ).provideReferences(document, position, {
+        ).provideReferences(textDocument, position, {
             includeDeclaration: false,
         }) as Observable<sourcegraph.Badged<sourcegraph.Location>[]>
 
@@ -106,7 +106,13 @@ describe('createReferencesProvider', () => {
             [location1, location2],
             [location1, location2, location3],
             [location1, location2, location3, { ...location4, badge: impreciseBadge }],
-            [location1, location2, location3, { ...location4, badge: impreciseBadge }, { ...location7, badge: impreciseBadge }],
+            [
+                location1,
+                location2,
+                location3,
+                { ...location4, badge: impreciseBadge },
+                { ...location7, badge: impreciseBadge },
+            ],
         ])
     })
 })
@@ -116,7 +122,7 @@ describe('createHoverProvider', () => {
         const result = createHoverProvider(
             () => asyncGeneratorFromValues([hover1, hover2]),
             () => asyncGeneratorFromValues([hover3])
-        ).provideHover(document, position) as Observable<sourcegraph.Badged<sourcegraph.Hover>>
+        ).provideHover(textDocument, position) as Observable<sourcegraph.Badged<sourcegraph.Hover>>
 
         assert.deepStrictEqual(await gatherValues(result), [hover1, hover2])
     })
@@ -125,17 +131,17 @@ describe('createHoverProvider', () => {
         const result = createHoverProvider(
             () => asyncGeneratorFromValues([]),
             () => asyncGeneratorFromValues([hover3])
-        ).provideHover(document, position) as Observable<sourcegraph.Badged<sourcegraph.Hover>>
+        ).provideHover(textDocument, position) as Observable<sourcegraph.Badged<sourcegraph.Hover>>
 
         assert.deepStrictEqual(await gatherValues(result), [{ ...hover3, badge: impreciseBadge }])
     })
 })
 
 describe('createDocumentHighlightProvider', () => {
-    it('uses LSIF documentument highlights', async () => {
+    it('uses LSIF document highlights', async () => {
         const result = createDocumentHighlightProvider(() =>
             asyncGeneratorFromValues([[{ range: range1 }, { range: range2 }]])
-        ).provideDocumentHighlights(document, position) as Observable<sourcegraph.DocumentHighlight[]>
+        ).provideDocumentHighlights(textDocument, position) as Observable<sourcegraph.DocumentHighlight[]>
 
         assert.deepStrictEqual(await gatherValues(result), [[{ range: range1 }, { range: range2 }]])
     })

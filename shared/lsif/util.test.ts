@@ -2,16 +2,16 @@ import * as sourcegraph from 'sourcegraph'
 import { createStubTextDocument } from '@sourcegraph/extension-api-stubs'
 import { GenericLSIFResponse } from './api'
 
-export const document = createStubTextDocument({
-    uri: 'git://repo?rev#foo.ts',
-    languageId: 'typescript',
-    text: undefined,
-})
-
 export const makeResource = (name: string, oid: string, path: string) => ({
     repository: { name },
     commit: { oid },
     path,
+})
+
+export const textDocument = createStubTextDocument({
+    uri: 'git://repo?rev#foo.ts',
+    languageId: 'typescript',
+    text: undefined,
 })
 
 export const position = new sourcegraph.Position(5, 10)

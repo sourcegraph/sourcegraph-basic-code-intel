@@ -8,7 +8,7 @@ import {
     RangesResponse,
     findOverlappingCodeIntelligenceRange,
 } from './ranges'
-import { range1, makeEnvelope, range2, range3, document, makeResource, position } from './util.test'
+import { range1, makeEnvelope, range2, range3, textDocument, makeResource, position } from './util.test'
 import { QueryGraphQLFn } from '../util/graphql'
 import { GenericLSIFResponse } from './api'
 
@@ -24,7 +24,7 @@ describe('findOverlappingWindows', () => {
             { startLine: 7, endLine: 9, ranges: Promise.resolve([aggregate3]) },
         ]
 
-        assert.deepEqual(await findOverlappingWindows(document, position, windows), [aggregate2])
+        assert.deepEqual(await findOverlappingWindows(textDocument, position, windows), [aggregate2])
     })
 
     it('creates new window and inserts it correctly', async () => {
@@ -38,7 +38,7 @@ describe('findOverlappingWindows', () => {
             { startLine: 7, endLine: 9, ranges: Promise.resolve([aggregate3]) },
         ]
 
-        assert.deepEqual(await findOverlappingWindows(document, position, windows, queryGraphQLFn), [aggregate2])
+        assert.deepEqual(await findOverlappingWindows(textDocument, position, windows, queryGraphQLFn), [aggregate2])
         assert.equal(windows.length, 3)
         assert.equal(windows[1].startLine, 4)
         assert.equal(windows[1].endLine, 6)
@@ -167,7 +167,7 @@ describe('rangesInRangeWindow', () => {
             })
         )
 
-        assert.deepEqual(await rangesInRangeWindow(document, 10, 20, queryGraphQLFn), [
+        assert.deepEqual(await rangesInRangeWindow(textDocument, 10, 20, queryGraphQLFn), [
             {
                 range: range1,
                 definitions: [new sourcegraph.Location(new URL('git://repo?rev#/bar.ts'), range2)],
@@ -187,6 +187,6 @@ describe('rangesInRangeWindow', () => {
             makeEnvelope()
         )
 
-        assert.deepStrictEqual(await rangesInRangeWindow(document, 10, 20, queryGraphQLFn), null)
+        assert.deepStrictEqual(await rangesInRangeWindow(textDocument, 10, 20, queryGraphQLFn), null)
     })
 })

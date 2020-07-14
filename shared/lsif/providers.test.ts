@@ -20,7 +20,7 @@ import {
     range4,
     range5,
     range6,
-    document,
+    textDocument,
     position,
 } from './util.test'
 
@@ -44,7 +44,7 @@ describe('graphql providers', () => {
 
             assert.deepEqual(
                 await gatherValues(
-                    createProviders(queryGraphQLFn, getBulkLocalIntelligence).definition(document, position)
+                    createProviders(queryGraphQLFn, getBulkLocalIntelligence).definition(textDocument, position)
                 ),
                 [
                     [
@@ -69,7 +69,7 @@ describe('graphql providers', () => {
                 })
             )
 
-            assert.deepEqual(await gatherValues(createProviders(queryGraphQLFn).definition(document, position)), [
+            assert.deepEqual(await gatherValues(createProviders(queryGraphQLFn).definition(textDocument, position)), [
                 [
                     new sourcegraph.Location(new URL('git://repo1?deadbeef1#/a.ts'), range1),
                     new sourcegraph.Location(new URL('git://repo2?deadbeef2#/b.ts'), range2),
@@ -83,7 +83,9 @@ describe('graphql providers', () => {
                 makeEnvelope()
             )
 
-            assert.deepEqual(await gatherValues(createProviders(queryGraphQLFn).definition(document, position)), [null])
+            assert.deepEqual(await gatherValues(createProviders(queryGraphQLFn).definition(textDocument, position)), [
+                null,
+            ])
         })
     })
 
@@ -115,7 +117,7 @@ describe('graphql providers', () => {
 
             assert.deepEqual(
                 await gatherValues(
-                    createProviders(queryGraphQLFn, getBulkLocalIntelligence).references(document, position, {
+                    createProviders(queryGraphQLFn, getBulkLocalIntelligence).references(textDocument, position, {
                         includeDeclaration: false,
                     })
                 ),
@@ -145,7 +147,7 @@ describe('graphql providers', () => {
 
             assert.deepEqual(
                 await gatherValues(
-                    createProviders(queryGraphQLFn).references(document, position, {
+                    createProviders(queryGraphQLFn).references(textDocument, position, {
                         includeDeclaration: false,
                     })
                 ),
@@ -166,7 +168,7 @@ describe('graphql providers', () => {
 
             assert.deepEqual(
                 await gatherValues(
-                    createProviders(queryGraphQLFn).references(document, position, {
+                    createProviders(queryGraphQLFn).references(textDocument, position, {
                         includeDeclaration: false,
                     })
                 ),
@@ -212,7 +214,7 @@ describe('graphql providers', () => {
 
             assert.deepEqual(
                 await gatherValues(
-                    createProviders(queryGraphQLFn).references(document, position, {
+                    createProviders(queryGraphQLFn).references(textDocument, position, {
                         includeDeclaration: false,
                     })
                 ),
@@ -245,7 +247,7 @@ describe('graphql providers', () => {
 
             assert.deepEqual(
                 await gatherValues(
-                    createProviders(queryGraphQLFn).references(document, position, {
+                    createProviders(queryGraphQLFn).references(textDocument, position, {
                         includeDeclaration: false,
                     })
                 ),
@@ -273,7 +275,9 @@ describe('graphql providers', () => {
             )
 
             assert.deepEqual(
-                await gatherValues(createProviders(queryGraphQLFn, getBulkLocalIntelligence).hover(document, position)),
+                await gatherValues(
+                    createProviders(queryGraphQLFn, getBulkLocalIntelligence).hover(textDocument, position)
+                ),
                 [
                     {
                         contents: {
@@ -296,7 +300,7 @@ describe('graphql providers', () => {
                 })
             )
 
-            assert.deepStrictEqual(await gatherValues(createProviders(queryGraphQLFn).hover(document, position)), [
+            assert.deepStrictEqual(await gatherValues(createProviders(queryGraphQLFn).hover(textDocument, position)), [
                 {
                     contents: {
                         value: 'foo',
@@ -312,7 +316,7 @@ describe('graphql providers', () => {
                 makeEnvelope()
             )
 
-            assert.deepStrictEqual(await gatherValues(createProviders(queryGraphQLFn).hover(document, position)), [
+            assert.deepStrictEqual(await gatherValues(createProviders(queryGraphQLFn).hover(textDocument, position)), [
                 null,
             ])
         })
@@ -340,7 +344,7 @@ describe('graphql providers', () => {
 
             assert.deepEqual(
                 await gatherValues(
-                    createProviders(queryGraphQLFn, getBulkLocalIntelligence).documentHighlights(document, position)
+                    createProviders(queryGraphQLFn, getBulkLocalIntelligence).documentHighlights(textDocument, position)
                 ),
                 [[{ range: range1 }, { range: range3 }, { range: range5 }]]
             )
@@ -363,7 +367,7 @@ describe('graphql providers', () => {
                 })
             )
             assert.deepEqual(
-                await gatherValues(createProviders(queryGraphQLFn).documentHighlights(document, position)),
+                await gatherValues(createProviders(queryGraphQLFn).documentHighlights(textDocument, position)),
                 [[{ range: range1 }, { range: range3 }, { range: range5 }]]
             )
         })
@@ -373,7 +377,7 @@ describe('graphql providers', () => {
                 makeEnvelope()
             )
             assert.deepEqual(
-                await gatherValues(createProviders(queryGraphQLFn).documentHighlights(document, position)),
+                await gatherValues(createProviders(queryGraphQLFn).documentHighlights(textDocument, position)),
                 [null]
             )
         })

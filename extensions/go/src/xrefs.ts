@@ -64,7 +64,7 @@ export function createExternalReferencesProvider(
 ): ReferencesProvider {
     const gddoURL = settings['go.gddoURL']
     const corsAnywhereURL = settings['go.corsAnywhereURL']
-    const limit = settings['go.maxExternalReferenceRepos'] || 20
+    const limit: number = settings['go.maxExternalReferenceRepos'] || 20
 
     const findDependents = async (packageName: string): Promise<string[]> => {
         if (gddoURL) {

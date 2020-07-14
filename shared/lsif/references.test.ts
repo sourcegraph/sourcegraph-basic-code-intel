@@ -13,7 +13,7 @@ import {
     range1,
     range2,
     range3,
-    document,
+    textDocument,
     position,
 } from './util.test'
 
@@ -32,7 +32,7 @@ describe('referencesForPosition', () => {
             })
         )
 
-        assert.deepEqual(await gatherValues(referencesForPosition(document, position, queryGraphQLFn)), [
+        assert.deepEqual(await gatherValues(referencesForPosition(textDocument, position, queryGraphQLFn)), [
             [
                 new sourcegraph.Location(new URL('git://repo1?deadbeef1#/a.ts'), range1),
                 new sourcegraph.Location(new URL('git://repo2?deadbeef2#/b.ts'), range2),
@@ -46,7 +46,7 @@ describe('referencesForPosition', () => {
             makeEnvelope()
         )
 
-        assert.deepEqual(await gatherValues(referencesForPosition(document, position, queryGraphQLFn)), [])
+        assert.deepEqual(await gatherValues(referencesForPosition(textDocument, position, queryGraphQLFn)), [])
     })
 
     it('should paginate results', async () => {
@@ -85,7 +85,7 @@ describe('referencesForPosition', () => {
         const location2 = new sourcegraph.Location(new URL('git://repo2?deadbeef2#/b.ts'), range2)
         const location3 = new sourcegraph.Location(new URL('git://repo3?deadbeef3#/c.ts'), range3)
 
-        assert.deepEqual(await gatherValues(referencesForPosition(document, position, queryGraphQLFn)), [
+        assert.deepEqual(await gatherValues(referencesForPosition(textDocument, position, queryGraphQLFn)), [
             [location1],
             [location1, location2],
             [location1, location2, location3],
@@ -115,7 +115,7 @@ describe('referencesForPosition', () => {
             values.push(lastCopy)
         }
 
-        assert.deepEqual(await gatherValues(referencesForPosition(document, position, queryGraphQLFn)), values)
+        assert.deepEqual(await gatherValues(referencesForPosition(textDocument, position, queryGraphQLFn)), values)
 
         assert.equal(queryGraphQLFn.callCount, MAX_REFERENCE_PAGE_REQUESTS)
     })
