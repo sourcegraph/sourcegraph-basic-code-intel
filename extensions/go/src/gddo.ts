@@ -52,10 +52,7 @@ export async function findReposViaGDDO(
  */
 function transformGithubCloneURL(path: string): string | undefined {
     if (path.startsWith('github.com/')) {
-        return path
-            .split('/')
-            .slice(0, 3)
-            .join('/')
+        return path.split('/').slice(0, 3).join('/')
     }
 
     return undefined

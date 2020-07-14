@@ -21,10 +21,7 @@ export function extractFromLines(fileContent: string, ...patterns: RegExp[]): st
         return undefined
     }
 
-    return fileContent
-        .split('\n')
-        .map(extractMatch)
-        .filter(isDefined)
+    return fileContent.split('\n').map(extractMatch).filter(isDefined)
 }
 
 /**

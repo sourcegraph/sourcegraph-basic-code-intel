@@ -73,7 +73,7 @@ export async function* referencesForPosition(
     position: sourcegraph.Position,
     queryGraphQL: QueryGraphQLFn<GenericLSIFResponse<ReferencesResponse | null>> = sgQueryGraphQL
 ): AsyncGenerator<sourcegraph.Location[] | null, void, undefined> {
-    const queryPage = async function*(
+    const queryPage = async function* (
         requestsRemaining: number,
         after?: string
     ): AsyncGenerator<sourcegraph.Location[] | null, void, undefined> {

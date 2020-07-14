@@ -144,7 +144,7 @@ export function createDefinitionProvider(
     searchProvider: DefinitionProvider
 ): sourcegraph.DefinitionProvider {
     return {
-        provideDefinition: wrapProvider(async function*(
+        provideDefinition: wrapProvider(async function* (
             doc: sourcegraph.TextDocument,
             pos: sourcegraph.Position
         ): AsyncGenerator<sourcegraph.Definition | undefined, void, undefined> {
@@ -191,7 +191,7 @@ export function createReferencesProvider(
     const file = (loc: sourcegraph.Location): string => `${loc.uri.host} ${loc.uri.pathname} ${loc.uri.hash}`
 
     return {
-        provideReferences: wrapProvider(async function*(
+        provideReferences: wrapProvider(async function* (
             doc: sourcegraph.TextDocument,
             pos: sourcegraph.Position,
             ctx: sourcegraph.ReferenceContext
@@ -240,7 +240,7 @@ export function createHoverProvider(
     searchProvider: HoverProvider
 ): sourcegraph.HoverProvider {
     return {
-        provideHover: wrapProvider(async function*(
+        provideHover: wrapProvider(async function* (
             doc: sourcegraph.TextDocument,
             pos: sourcegraph.Position
         ): AsyncGenerator<sourcegraph.Badged<sourcegraph.Hover> | null | undefined, void, undefined> {
@@ -281,7 +281,7 @@ export function createDocumentHighlightProvider(
     lsifProvider: DocumentHighlightProvider
 ): sourcegraph.DocumentHighlightProvider {
     return {
-        provideDocumentHighlights: wrapProvider(async function*(
+        provideDocumentHighlights: wrapProvider(async function* (
             doc: sourcegraph.TextDocument,
             pos: sourcegraph.Position
         ): AsyncGenerator<sourcegraph.DocumentHighlight[] | null | undefined, void, undefined> {

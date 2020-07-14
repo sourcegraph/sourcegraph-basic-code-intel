@@ -73,7 +73,7 @@ function references(
     position: sourcegraph.Position
 ) => AsyncGenerator<sourcegraph.Location[] | null, void, undefined> {
     // eslint-disable-next-line @typescript-eslint/require-await
-    return async function*(
+    return async function* (
         doc: sourcegraph.TextDocument,
         position: sourcegraph.Position
     ): AsyncGenerator<sourcegraph.Location[] | null, void, undefined> {

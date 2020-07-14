@@ -6,7 +6,7 @@ import { Observable, Observer } from 'rxjs'
 /**
  * An async generator that yields no values.
  */
-export const noopAsyncGenerator = async function*<T>(): AsyncGenerator<T, void, undefined> {
+export const noopAsyncGenerator = async function* <T>(): AsyncGenerator<T, void, undefined> {
     /* no-op */
 }
 
@@ -109,7 +109,7 @@ export function flatMapConcurrent<T, R>(
 export function asyncGeneratorFromPromise<P extends unknown[], R>(
     fn: (...args: P) => Promise<R>
 ): (...args: P) => AsyncGenerator<R, void, unknown> {
-    return async function*(...args: P): AsyncGenerator<R, void, unknown> {
+    return async function* (...args: P): AsyncGenerator<R, void, unknown> {
         yield await fn(...args)
     }
 }

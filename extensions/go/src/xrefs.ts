@@ -75,7 +75,7 @@ export function createExternalReferencesProvider(
         return api.findReposViaSearch(`file:\\.go$ \t"${packageName}" max:${limit}`)
     }
 
-    return async function*(
+    return async function* (
         doc: sourcegraph.TextDocument,
         pos: sourcegraph.Position
     ): AsyncGenerator<sourcegraph.Location[] | null, void, undefined> {

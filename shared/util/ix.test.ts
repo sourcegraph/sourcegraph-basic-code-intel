@@ -4,7 +4,7 @@ import { asyncGeneratorFromPromise, concat, flatMapConcurrent, observableFromAsy
 describe('observableFromAsyncIterator', () => {
     it('converts iterator into an observable', async () => {
         const o = observableFromAsyncIterator(() =>
-            (async function*(): AsyncIterator<number> {
+            (async function* (): AsyncIterator<number> {
                 await Promise.resolve()
                 yield 1
                 yield 2
@@ -21,7 +21,7 @@ describe('observableFromAsyncIterator', () => {
 
     it('throws iterator error', async () => {
         const o = observableFromAsyncIterator(() =>
-            (async function*(): AsyncIterator<number> {
+            (async function* (): AsyncIterator<number> {
                 await Promise.resolve()
                 yield 1
                 yield 2
@@ -38,7 +38,7 @@ describe('observableFromAsyncIterator', () => {
 describe('concat', () => {
     it('returns all previous values', async () => {
         const iterable = concat(
-            (async function*(): AsyncIterable<number[] | null> {
+            (async function* (): AsyncIterable<number[] | null> {
                 await Promise.resolve()
                 yield [1]
                 yield [2, 3]
@@ -51,7 +51,7 @@ describe('concat', () => {
 
     it('ignores nulls', async () => {
         const iterable = concat(
-            (async function*(): AsyncIterable<number[] | null> {
+            (async function* (): AsyncIterable<number[] | null> {
                 await Promise.resolve()
                 yield null
                 yield [1]
